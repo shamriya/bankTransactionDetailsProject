@@ -1,0 +1,84 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+}
+
+group 'org.taskManagement'
+version '1.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+
+apply plugin: "jacoco"
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:9.0.40'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'io.springfox:springfox-swagger2:2.10.5'
+    implementation 'io.springfox:springfox-swagger-ui:2.10.5'
+    implementation 'io.springfox:springfox-data-rest:2.10.5'
+    implementation group: 'org.hibernate', name: 'hibernate-entitymanager'
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-core
+    implementation group: 'org.hibernate', name: 'hibernate-core'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.mockito:mockito-inline:2.23.0'
+    runtimeOnly 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+jacocoTestReport {
+    additionalSourceDirs.from = files(sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
+    classDirectories.from =  files(sourceSets.main.output)
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File',
+                'Main-Class': ' com.bank.details.BankingApplication'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
